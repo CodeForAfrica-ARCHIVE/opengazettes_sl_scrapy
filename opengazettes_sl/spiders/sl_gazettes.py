@@ -1,8 +1,10 @@
 from datetime import datetime
 import re
+import requests
 import scrapy
 
 from  ..items import OpengazettesSlItem
+from ..pdf_reader import parsePDF as pdf_meta
 
 class GazettesSpider(scrapy.Spider):
     name = "sl_gazettes"
@@ -55,12 +57,16 @@ class GazettesSpider(scrapy.Spider):
             item['gazette_link'] = link.xpath('a/@href').extract_first()
             item['filename'] = link.xpath(
                 'a/div/img/@alt').extract_first()
-            is_gaz = item['filename'].startswith('week')
-            if item['filename'].endswith('.pdf') and not is_gaz:
+            if item['filename'].endswith('.pdf'):
                 item = self.create_meta(item)
             yield item
 
     def create_meta(self, item):
+        # check if a file has its metadata on the filename
+        # If not return the meta as is with a no-meta flag
+        if item['filename'].startswith('week'):
+            item['filename'] = self.build_meta(item)
+
         opts = re.findall(r'\b[A-Za-z]+\b', item['filename'])
         num_opts = re.findall(r'\d+', item['filename'])
         item['gazette_volume'] = opts[0].upper()
@@ -93,6 +99,20 @@ class GazettesSpider(scrapy.Spider):
                 return item['gazette_number'] + '-supp {}'.format(
                     check )
         return item['gazette_number']
+
+    def build_meta(self, meta):
+        # generate file meta
+        link = meta['gazette_link'].replace('?dl=0', '?dl=1')
+        num = re.findall(r'\d+', meta['filename'])[-1]
+        gazette_number = num
+        publication_date,\
+        gazette_volume = pdf_meta(link)
+
+        filename = '{} {} No.{}'.format(
+            gazette_volume, publication_date.strftime('%d-%m-%Y'),
+            gazette_number
+        )
+        return filename
 
 
 

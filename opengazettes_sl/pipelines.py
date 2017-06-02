@@ -1,23 +1,14 @@
-# # -*- coding: utf-8 -*-
-#
-# # Define your item pipelines here
-# #
-# # Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#
-#
-# class OpengazettesSlPipeline(object):
-#     def process_item(self, item, spider):
-#         return item
 # -*- coding: utf-8 -*-
+
 import logging
 from scrapy.http import Request
 from scrapy.utils.request import referer_str
 from scrapy.pipelines.files import FilesPipeline
 from scrapy.pipelines.files import FileException
 from scrapy.utils.misc import md5sum
+import requests
 
-from unidecode import unidecode
+
 try:
     from cStringIO import StringIO as BytesIO
 except ImportError:
@@ -81,7 +72,11 @@ class OpengazettesSlPipeline(FilesPipeline):
         return {'url': request.url, 'path': path, 'checksum': checksum }
 
     def get_media_requests(self, item, info):
-        return [Request(x, meta=item)
+        # catch the 302 error here, so that requests are made
+        # to the correct url
+        # return [Request(self.handle_redirect(x), meta=item)
+        #         for x in item.get(self.files_urls_field, [])]
+        return [Request(self.handle_redirect(x), meta=item)
                 for x in item.get(self.files_urls_field, [])]
 
     def file_path(self, request, response=None, info=None):
@@ -105,32 +100,27 @@ class OpengazettesSlPipeline(FilesPipeline):
             _warn()
             return self.file_key(url)
         # end of deprecation warning block
-
         # Now using file name passed in the meta data
         filename = request.meta['filename']
         media_ext = 'pdf'
         return '%s/%s/%s%s' % \
-            (request.meta['gazette_year'],
-                self.get_month_number(request.meta['gazette_month']),
+            (request.meta['publication_date'].strftime("%Y"),
+                request.meta['publication_date'].strftime("%m"),
                 filename, media_ext)
 
     def file_downloaded(self, response, request, info):
         path = self.file_path(request, response=response, info=info)
-        content = self.modify_response(response)
-        self.loop.append(content)
-        if len(self.loop) == request.meta['file_urls_len']:
-            cont = ''
-            for item in self.loop:
-                cont += item + '\n'
-            buf = BytesIO(cont.encode())
-            checksum = md5sum(buf)
-            buf.seek(0)
-            self.store.persist_file(path, buf, info)
-            self.loop = []
-            return checksum
-        return None
+        buf = BytesIO(response.body)
+        checksum = md5sum(buf)
+        buf.seek(0)
+        self.store.persist_file(path, buf, info)
+        return checksum
 
-    def item_completed(self, results, item, info):
-        if isinstance(item, dict) or self.files_result_field in item.fields:
-            item[self.files_result_field] = [x for ok, x in results if ok]
-        return item
+    # this to handle the 302 redirect error,
+    # if status code is 302 return the new url
+    # else use the original url
+    def handle_redirect(self, file_url):
+        response = requests.head(file_url)
+        if response.status_code == 302:
+            file_url = response.headers["Location"]
+        return file_url
