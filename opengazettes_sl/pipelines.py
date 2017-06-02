@@ -132,20 +132,5 @@ class OpengazettesSlPipeline(FilesPipeline):
 
     def item_completed(self, results, item, info):
         if isinstance(item, dict) or self.files_result_field in item.fields:
-            item[self.files_result_field] = [x for ok, x in results if (ok and x['checksum'])]
+            item[self.files_result_field] = [x for ok, x in results if ok]
         return item
-
-    def get_month_number(self, month):
-        months_fr = ['janvier', 'fevrier', 'mars', 'avril',
-                     'mai', 'juin','juillet', 'aout',
-                     'septembre', 'octobre', 'novembre', 'decembre']
-        p_month = unidecode(month.strip()).lower()
-        for month in months_fr:
-            # sometimes the month name on http://www.jo.gouv.sn/spip.php
-            # are misspelt, hence the startswith check
-            if month == p_month or month.startswith(p_month[:4]):
-                month_number = str(months_fr.index(month) + 1)
-
-        if len(month_number) == 1:
-            return '0' + month_number
-        return month_number

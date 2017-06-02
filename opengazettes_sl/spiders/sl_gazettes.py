@@ -22,7 +22,6 @@ class GazettesSpider(scrapy.Spider):
             year = self.year
         except AttributeError:
             year = datetime.now().strftime('%Y')
-
         year_links = len(response.xpath(
             "//li[@class='sl-grid-cell']").extract()) + 1
         year_link = self.get_year_link(response, year_links, year)
@@ -48,7 +47,6 @@ class GazettesSpider(scrapy.Spider):
 
         return False
 
-
     def get_year_gazettes(self, response):
         gazette_links = response.xpath(
                 "//ol/li")
@@ -57,10 +55,9 @@ class GazettesSpider(scrapy.Spider):
             item['gazette_link'] = link.xpath('a/@href').extract_first()
             item['filename'] = link.xpath(
                 'a/div/img/@alt').extract_first()
-
-            if not item['filename'].endswith('.pdf'):
-                continue
-            item = self.create_meta(item)
+            is_gaz = item['filename'].startswith('week')
+            if item['filename'].endswith('.pdf') and not is_gaz:
+                item = self.create_meta(item)
             yield item
 
     def create_meta(self, item):
@@ -72,15 +69,16 @@ class GazettesSpider(scrapy.Spider):
             num_opts[-2], num_opts[-3],num_opts[-4]),'%Y-%m-%d')
 
         item['gazette_number'] = num_opts[-1]
+        gazette_id = self.check_special(item)
         item['filename'] = 'opengazettes-sl-vol-%s-no-%s-dated-%s-%s-%s' % \
-                           (item['gazette_volume'], item['gazette_number'],
+                           (item['gazette_volume'], gazette_id,
                             item['publication_date'].strftime("%d"),
                             item['publication_date'].strftime("%B"),
                             item['publication_date'].strftime("%Y"))
 
         item['gazette_title'] = 'Sierra Leone Government ' \
                                 'Gazette Vol.%s No.%s Dated %s %s %s' % \
-                                (item['gazette_volume'], item['gazette_number'],
+                                (item['gazette_volume'], gazette_id,
                                  item['publication_date'].strftime("%d"),
                                  item['publication_date'].strftime("%B"),
                                  item['publication_date'].strftime("%Y"))
@@ -88,6 +86,13 @@ class GazettesSpider(scrapy.Spider):
 
         return item
 
+    def check_special(self, item):
+        checks = ['one', 'two']
+        for check in checks:
+            if check in item['filename']:
+                return item['gazette_number'] + '-supp {}'.format(
+                    check )
+        return item['gazette_number']
 
 
 
