@@ -13,10 +13,12 @@ BOT_NAME = 'opengazettes_sl'
 
 SPIDER_MODULES = ['opengazettes_sl.spiders']
 NEWSPIDER_MODULE = 'opengazettes_sl.spiders'
+FILES_STORE_S3_ACL = 'public-read'
+DELTAFETCH_ENABLED = True
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'opengazettes_sl (+https://sierraleone.opengazettes.co/)'
+USER_AGENT = 'opengazettes_sl (+https://sierraleone.opengazettes.co)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -49,6 +51,9 @@ DOWNLOAD_DELAY = 3
 #SPIDER_MIDDLEWARES = {
 #    'opengazettes_sl.middlewares.OpengazettesSlSpiderMiddleware': 543,
 #}
+SPIDER_MIDDLEWARES = {
+   'scrapy_deltafetch.DeltaFetch': True,
+}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
@@ -66,6 +71,10 @@ DOWNLOAD_DELAY = 3
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'opengazettes_sl.pipelines.OpengazettesSlPipeline': 300,
+}
+
+FEED_STORAGES = {
+    's3': 'opengazettes_sl.extensions.feedexport.S3FeedStorage'
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

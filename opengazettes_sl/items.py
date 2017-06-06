@@ -18,4 +18,3 @@ class OpengazettesSlItem(scrapy.Item):
     file_urls = scrapy.Field()
     filename = scrapy.Field()
     gazette_title = scrapy.Field()
-    no_meta = scrapy.Field()

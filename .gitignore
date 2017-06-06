@@ -103,3 +103,4 @@ ENV/
 # pyCharm files
 .idea/
 .DS_Store
+files/

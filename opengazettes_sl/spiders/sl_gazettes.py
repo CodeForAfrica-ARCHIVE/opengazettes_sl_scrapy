@@ -56,7 +56,7 @@ class GazettesSpider(scrapy.Spider):
         # subprocess.call(['open', 'text.html'])
         gazette_links = response.xpath(
                 "//ol/li")
-
+        print gazette_links
         for link in gazette_links:
             item = OpengazettesSlItem()
             item['gazette_link'] = link.xpath('a/@href').extract_first()
