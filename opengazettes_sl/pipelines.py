@@ -102,7 +102,7 @@ class OpengazettesSlPipeline(FilesPipeline):
         # end of deprecation warning block
         # Now using file name passed in the meta data
         filename = request.meta['filename']
-        media_ext = 'pdf'
+        media_ext = '.pdf'
         return '%s/%s/%s%s' % \
             (request.meta['publication_date'].strftime("%Y"),
                 request.meta['publication_date'].strftime("%m"),

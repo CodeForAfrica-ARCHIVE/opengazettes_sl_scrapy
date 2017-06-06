@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'opengazettes_sl.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'opengazettes_sl (+http://www.yourdomain.com)'
+USER_AGENT = 'opengazettes_sl (+https://sierraleone.opengazettes.co/)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True

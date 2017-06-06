@@ -7,6 +7,7 @@ import urllib2
 from urllib2 import Request
 from pdfminer.pdfparser import PDFParser
 from cStringIO import StringIO
+import re
 import dateparser
 
 # def convert_pdf_to_txt(path):
@@ -74,4 +75,5 @@ def get_date(data):
 def get_vol(data):
 	for item in data:
 		if item.lower().startswith('vol'):
-			return item
+			vol =  re.findall(r'\b[A-Za-z]+\b', item)[-1]
+			return vol

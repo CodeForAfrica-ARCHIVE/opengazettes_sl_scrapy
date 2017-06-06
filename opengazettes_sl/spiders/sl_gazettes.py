@@ -50,8 +50,13 @@ class GazettesSpider(scrapy.Spider):
         return False
 
     def get_year_gazettes(self, response):
+        # import subprocess
+        # with open('text.html', 'w') as f:
+        #     f.write(response.body)
+        # subprocess.call(['open', 'text.html'])
         gazette_links = response.xpath(
                 "//ol/li")
+
         for link in gazette_links:
             item = OpengazettesSlItem()
             item['gazette_link'] = link.xpath('a/@href').extract_first()
@@ -59,12 +64,13 @@ class GazettesSpider(scrapy.Spider):
                 'a/div/img/@alt').extract_first()
             if item['filename'].endswith('.pdf'):
                 item = self.create_meta(item)
+            else: continue
             yield item
 
     def create_meta(self, item):
         # check if a file has its metadata on the filename
         # If not return the meta as is with a no-meta flag
-        if item['filename'].startswith('week'):
+        if 'gazette' in item['filename'] or 'week' in item['filename']:
             item['filename'] = self.build_meta(item)
 
         opts = re.findall(r'\b[A-Za-z]+\b', item['filename'])
