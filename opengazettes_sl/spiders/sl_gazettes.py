@@ -90,6 +90,7 @@ class GazettesSpider(scrapy.Spider):
                                  item['publication_date'].strftime("%B"),
                                  item['publication_date'].strftime("%Y"))
         item['file_urls'] = [item['gazette_link'].replace('?dl=0', '?dl=1')]
+        item['gazette_link'] = 'http://www.africanlii.org'
 
         return item
 
