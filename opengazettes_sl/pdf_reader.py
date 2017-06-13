@@ -10,31 +10,6 @@ from cStringIO import StringIO
 import re
 import dateparser
 
-# def convert_pdf_to_txt(path):
-# 	rsrcmgr = PDFResourceManager()
-# 	retstr = StringIO()
-# 	codec = 'utf-8'
-# 	laparams = LAParams()
-# 	device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
-# 	fp = file(path, 'rb')
-# 	interpreter = PDFPageInterpreter(rsrcmgr, device)
-# 	password = ""
-# 	maxpages = 1
-# 	caching = True
-# 	pagenos=set()
-#
-# 	for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages, password=password, caching=caching, check_extractable=True):
-# 			interpreter.process_page(page)
-#
-# 	text = retstr.getvalue()
-#
-# 	fp.close()
-# 	device.close()
-# 	retstr.close()
-# 	time = get_date([line for line in text.split('\n') if line][:20])
-# 	vol = get_vol([line for line in text.split('\n') if line][:20])
-# 	return time, vol
-
 def parsePDF(url):
 	open = urllib2.urlopen(Request(url)).read()
 	# Cast to StringIO object
